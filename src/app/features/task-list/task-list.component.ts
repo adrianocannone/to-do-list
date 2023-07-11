@@ -9,14 +9,36 @@ import { Task } from './model/task';
         class="list-group-item"
         *ngFor="let task of tasks"
       >
+       <span [ngClass]="task.completed? 'completed': null" >
         {{task.taskText}}
+       </span>
         <div class="pull-right">
-          <i class="fa fa-trash" (click)="deleteHandler(task)"></i>
+          
+          <i 
+            class="fa"
+            [ngClass]="{
+              'fa-close': task.completed,
+              'fa-check': !task.completed
+            }"
+            [style.color]="task.completed? null : 'green'"
+            (click)="editCompletion(task)"
+          ></i>
+          
+          <i 
+            class="fa fa-trash" 
+            style="color: red;"
+            (click)="deleteHandler(task)"
+          ></i>
         </div>
       </div>
     </div>
   `,
-  styles:[]
+  styles:[`
+    .completed {
+      color: green;
+      font-weight: bold;
+    }`
+  ]
 })
 export class TaskListComponent {
   tasks: Task[] = [];
@@ -35,6 +57,15 @@ export class TaskListComponent {
       .subscribe(() => {
         const index = this.tasks.findIndex(t => t.id === task.id);
         this.tasks.splice(index, 1)
+      })
+  }
+
+  editCompletion(task: Task){
+    task.completed = !task.completed;
+    this.http.patch<Task>(`http://localhost:3000/tasks/${task.id}`, task)
+      .subscribe(() => {
+        const index = this.tasks.findIndex(t => t.id === task.id);
+        this.tasks[index] = task
       })
   }
 }
