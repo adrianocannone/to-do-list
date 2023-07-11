@@ -1,9 +1,21 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http'
 import { Task } from './model/task';
+import { NgForm } from '@angular/forms';
 @Component({
   selector: 'ac-task-list',
   template: `
+    <form #f="ngForm" (submit)="save(f)">
+      <input
+        type="text"
+        required
+        [ngModel]
+        name="taskText"
+        placeholder="Inserisci la prossima task"
+        class="form-control"
+      >
+      <button type="submit" class="btn btn-info">Crea task</button>
+    </form>
     <div class="list-group mx-3">
       <div 
         class="list-group-item"
@@ -66,6 +78,15 @@ export class TaskListComponent {
       .subscribe(() => {
         const index = this.tasks.findIndex(t => t.id === task.id);
         this.tasks[index] = task
+      })
+  }
+
+  save(form: NgForm) {
+    console.log(form.value)
+    this.http.post<Task>('http://localhost:3000/tasks', form.value)
+      .subscribe(result => {
+        this.tasks.push(result)
+        form.reset()
       })
   }
 }
