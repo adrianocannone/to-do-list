@@ -1,71 +1,32 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http'
 import { Task } from './model/task';
-import { NgForm } from '@angular/forms';
 @Component({
   selector: 'ac-task-list',
   template: `
-    <form #f="ngForm" (submit)="save(f)">
-      <input
-        type="text"
-        required
-        [ngModel]="active?.taskText"
-        name="taskText"
-        placeholder="Inserisci la prossima task"
-        class="form-control"
-      >
-      <div class="btn-group">
-        <button type="submit" class="btn btn-info">
-          {{active ? 'Modifica task' : 'Crea task'}}
-        </button>
-        <button 
-          type="button"
-          class="btn btn-warning"
-          (click)="reset(f)"
-          *ngIf="active"
-        >Reset</button>
-      </div>
-    </form>
+    <ac-task-list-form
+      [active]="active"
+      (save)="save($event)"
+      (reset)="reset()"
+    ></ac-task-list-form>
 
-    <div class="list-group mx-3">
-      <div 
-        class="list-group-item"
-        *ngFor="let task of tasks"
-        (click)="setActive(task)"
-      >
-       <span [ngClass]="{'completed': task.completed}" >
-        {{task.taskText}}
-       </span>
-        <div class="pull-right" *ngIf="active?.id === task.id">
-          
-          <i 
-            class="fa"
-            [ngClass]="task.completed? 'fa-close' : 'fa-check'"
-            [style.color]="task.completed? null : 'green'"
-            (click)="editCompletion(task)"
-          ></i>
-          
-          <i 
-            class="fa fa-trash" 
-            style="color: red;"
-            (click)="deleteHandler(task)"
-          ></i>
-        </div>
-      </div>
-    </div>
+    <hr>
+
+    <ac-task-list-collection
+      [tasks]="tasks"
+      [active]="active"
+      (setActive)="setActive($event)"
+      (editCompletion)="editCompletion($event)"
+      (delete)="deleteHandler($event)"
+    ></ac-task-list-collection>
   `,
-  styles:[`
-    .completed {
-      color: green;
-      font-weight: bold;
-    }`
-  ]
+  styles:[]
 })
 export class TaskListComponent {
   tasks: Task[] = [];
   active: Task | null = null;
   constructor (private http: HttpClient) {
-    this.tasksInit()
+    this.tasksInit();
   }
 
   tasksInit() {
@@ -77,21 +38,21 @@ export class TaskListComponent {
     this.http.delete(`http://localhost:3000/tasks/${task.id}`)
       .subscribe(() => {
         const index = this.tasks.findIndex(t => t.id === task.id);
-        this.tasks.splice(index, 1)
+        this.tasks.splice(index, 1);
       })
   }
 
   editCompletion(task: Task){
     task.completed = !task.completed;
-    this.edit(task)
+    this.edit(task);
   }
 
-  save(form: NgForm){
-    if(this.active){
-      this.active.taskText=form.value.taskText
-      this.edit(this.active)
+  save(task: Task){
+    if(this.active?.id){
+      this.active.taskText=task.taskText;
+      this.edit(this.active);
     }else{
-      this.add(form)
+      this.add(task);
     }
   }
 
@@ -99,15 +60,15 @@ export class TaskListComponent {
     this.http.patch<Task>(`http://localhost:3000/tasks/${task.id}`, task)
       .subscribe(result => {
         const index = this.tasks.findIndex(t => t.id === task.id);
-        this.tasks[index] = result
+        this.tasks[index] = result;
       })
   }
 
-  add(form: NgForm) {
-    this.http.post<Task>('http://localhost:3000/tasks', form.value)
+  add(task: Task) {
+    this.http.post<Task>('http://localhost:3000/tasks', task)
       .subscribe(result => {
         this.tasks.push(result);
-        this.reset(form);
+        this.reset();
       })
   }
 
@@ -115,8 +76,7 @@ export class TaskListComponent {
     this.active = task;
   }
 
-  reset(form: NgForm){
-    this.active=null;
-    form.reset();
+  reset(){
+    this.active = null;
   }
 }
