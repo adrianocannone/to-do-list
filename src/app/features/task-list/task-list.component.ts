@@ -9,29 +9,38 @@ import { NgForm } from '@angular/forms';
       <input
         type="text"
         required
-        [ngModel]
+        [ngModel]="active?.taskText"
         name="taskText"
         placeholder="Inserisci la prossima task"
         class="form-control"
       >
-      <button type="submit" class="btn btn-info">Crea task</button>
+      <div class="btn-group">
+        <button type="submit" class="btn btn-info">
+          {{active ? 'Modifica task' : 'Crea task'}}
+        </button>
+        <button 
+          type="button"
+          class="btn btn-warning"
+          (click)="reset(f)"
+          *ngIf="active"
+        >Reset</button>
+      </div>
     </form>
+
     <div class="list-group mx-3">
       <div 
         class="list-group-item"
         *ngFor="let task of tasks"
+        (click)="setActive(task)"
       >
-       <span [ngClass]="task.completed? 'completed': null" >
+       <span [ngClass]="{'completed': task.completed}" >
         {{task.taskText}}
        </span>
-        <div class="pull-right">
+        <div class="pull-right" *ngIf="active?.id === task.id">
           
           <i 
             class="fa"
-            [ngClass]="{
-              'fa-close': task.completed,
-              'fa-check': !task.completed
-            }"
+            [ngClass]="task.completed? 'fa-close' : 'fa-check'"
             [style.color]="task.completed? null : 'green'"
             (click)="editCompletion(task)"
           ></i>
@@ -54,7 +63,7 @@ import { NgForm } from '@angular/forms';
 })
 export class TaskListComponent {
   tasks: Task[] = [];
-
+  active: Task | null = null;
   constructor (private http: HttpClient) {
     this.tasksInit()
   }
@@ -74,19 +83,40 @@ export class TaskListComponent {
 
   editCompletion(task: Task){
     task.completed = !task.completed;
+    this.edit(task)
+  }
+
+  save(form: NgForm){
+    if(this.active){
+      this.active.taskText=form.value.taskText
+      this.edit(this.active)
+    }else{
+      this.add(form)
+    }
+  }
+
+  edit(task: Task){
     this.http.patch<Task>(`http://localhost:3000/tasks/${task.id}`, task)
-      .subscribe(() => {
+      .subscribe(result => {
         const index = this.tasks.findIndex(t => t.id === task.id);
-        this.tasks[index] = task
+        this.tasks[index] = result
       })
   }
 
-  save(form: NgForm) {
-    console.log(form.value)
+  add(form: NgForm) {
     this.http.post<Task>('http://localhost:3000/tasks', form.value)
       .subscribe(result => {
-        this.tasks.push(result)
-        form.reset()
+        this.tasks.push(result);
+        this.reset(form);
       })
+  }
+
+  setActive(task: Task){
+    this.active = task;
+  }
+
+  reset(form: NgForm){
+    this.active=null;
+    form.reset();
   }
 }
