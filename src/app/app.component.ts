@@ -3,7 +3,9 @@ import { Component } from '@angular/core';
   selector: 'ac-root',
   template: `
     <!--<navbar></navbar>-->
-    <router-outlet></router-outlet>
+    <div class="container mt-3">
+      <router-outlet></router-outlet>
+    </div>
   `,
   styles: []
 })

@@ -37,8 +37,8 @@ export class TaskListFormComponent implements OnChanges{
   @ViewChild('f') form!: NgForm
 
   ngOnChanges(changes: SimpleChanges): void {
-    const activeId: number | null = changes['active'].currentValue.id
-    if(this.form && !activeId){
+    const active: Task | null = changes['active'].currentValue;
+    if(this.form && !active?.id){
       this.form.reset();
     }
   }

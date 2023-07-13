@@ -4,10 +4,14 @@ import { Task } from '../model/task';
 @Component({
   selector: 'ac-task-list-collection',
   template: `
-    <div class="list-group mx-3">
+    <div class="list-group">
       <div 
         class="list-group-item"
         *ngFor="let task of tasks"
+        [ngClass]="{
+          'active-not-completed': (active?.id === task.id) && !task.completed,
+          'active-completed': (active?.id === task.id) && task.completed
+        }"
         (click)="setActive.emit(task)"
       >
         <span [ngClass]="{'completed': task.completed}" >
@@ -33,6 +37,13 @@ import { Task } from '../model/task';
   .completed {
     color: green;
     font-weight: bold;
+  }`,
+    `
+  .active-not-completed {
+    background-color: #EAEAEA;
+  }`,
+  `.active-completed {
+    background-color: #66FF99;
   }`]
 })
 

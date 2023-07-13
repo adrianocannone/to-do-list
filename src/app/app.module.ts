@@ -8,6 +8,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { TaskListCollectionComponent } from './features/task-list/components/task-list-collection.component';
 import { TaskListFormComponent } from './features/task-list/components/task-list-form.component';
+import { CardComponent } from './features/shared/components/card.component';
 
 @NgModule({
   declarations: [
@@ -15,6 +16,8 @@ import { TaskListFormComponent } from './features/task-list/components/task-list
     TaskListComponent,
     TaskListCollectionComponent,
     TaskListFormComponent,
+    //shared
+    CardComponent,
   ],
   imports: [
     BrowserModule,
